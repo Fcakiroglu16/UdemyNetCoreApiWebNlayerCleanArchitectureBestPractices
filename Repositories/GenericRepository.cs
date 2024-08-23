@@ -18,6 +18,7 @@ namespace App.Repositories
 
         public IQueryable<T> Where(Expression<Func<T, bool>> predicate) => _dbSet.Where(predicate).AsNoTracking();
 
+
         public ValueTask<T?> GetByIdAsync(int id) => _dbSet.FindAsync(id);
 
         public async ValueTask AddAsync(T entity) => await _dbSet.AddAsync(entity);

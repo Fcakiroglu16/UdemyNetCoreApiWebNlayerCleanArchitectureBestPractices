@@ -7,6 +7,8 @@ namespace App.Repositories
         IQueryable<T> GetAll();
 
         IQueryable<T> Where(Expression<Func<T, bool>> predicate);
+
+
         ValueTask<T?> GetByIdAsync(int id);
         ValueTask AddAsync(T entity);
         void Update(T entity);
