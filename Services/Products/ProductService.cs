@@ -1,23 +1,26 @@
-﻿using System.Net;
-using App.Repositories;
+﻿using App.Repositories;
 using App.Repositories.Products;
+using App.Services.Products.Create;
+using App.Services.Products.Update;
+using App.Services.Products.UpdateStock;
+using AutoMapper;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 namespace App.Services.Products
 {
     public class ProductService(
         IProductRepository productRepository,
         IUnitOfWork unitOfWork,
-        IValidator<CreateProductRequest> createProdcutRequestValidator) : IProductService
+        IValidator<CreateProductRequest> createProdcutRequestValidator,
+        IMapper mapper) : IProductService
     {
         public async Task<ServiceResult<List<ProductDto>>> GetTopPriceProductsAsync(int count)
         {
             var products = await productRepository.GetTopPriceProductsAsync(count);
 
-
-            var productsAsDto = products.Select(p => new ProductDto(p.Id, p.Name, p.Price, p.Stock)).ToList();
-
+            var productsAsDto = mapper.Map<List<ProductDto>>(products);
 
             return new ServiceResult<List<ProductDto>>()
             {
@@ -30,7 +33,16 @@ namespace App.Services.Products
         {
             var products = await productRepository.GetAll().ToListAsync();
 
-            var productsAsDto = products.Select(p => new ProductDto(p.Id, p.Name, p.Price, p.Stock)).ToList();
+
+            #region manuel mapping
+
+            //  var productsAsDto = products.Select(p => new ProductDto(p.Id, p.Name, p.Price, p.Stock)).ToList();
+
+            #endregion
+
+
+            var productsAsDto = mapper.Map<List<ProductDto>>(products);
+
 
             return ServiceResult<List<ProductDto>>.Success(productsAsDto);
         }
@@ -46,8 +58,13 @@ namespace App.Services.Products
             var products = await productRepository.GetAll().Skip((pageNumber - 1) * pageSize).Take(pageSize)
                 .ToListAsync();
 
-            var productsAsDto = products.Select(p => new ProductDto(p.Id, p.Name, p.Price, p.Stock)).ToList();
+            #region manuel mapping
 
+            //var productsAsDto = products.Select(p => new ProductDto(p.Id, p.Name, p.Price, p.Stock)).ToList();
+
+            #endregion
+
+            var productsAsDto = mapper.Map<List<ProductDto>>(products);
             return ServiceResult<List<ProductDto>>.Success(productsAsDto);
         }
 
@@ -59,23 +76,32 @@ namespace App.Services.Products
 
             if (product is null)
             {
-                ServiceResult<ProductDto>.Fail("Product not found", HttpStatusCode.NotFound);
+                return ServiceResult<ProductDto?>.Fail("Product not found", HttpStatusCode.NotFound);
             }
 
-            var productAsDto = new ProductDto(product!.Id, product.Name, product.Price, product.Stock);
+            #region manuel mapping
+
+            // var productAsDto = new ProductDto(product!.Id, product.Name, product.Price, product.Stock);
+
+            #endregion
+
+            var productAsDto = mapper.Map<ProductDto>(product);
 
             return ServiceResult<ProductDto>.Success(productAsDto)!;
         }
 
         public async Task<ServiceResult<CreateProductResponse>> CreateAsync(CreateProductRequest request)
         {
+            //throw new CriticalException("kritik seviye bir hata meydana geldi");
+            //throw new Exception("db hatası");
+
             //async manuel service business check
             var anyProduct = await productRepository.Where(x => x.Name == request.Name).AnyAsync();
 
             if (anyProduct)
             {
                 return ServiceResult<CreateProductResponse>.Fail("ürün ismi veritabanında bulunmaktadır.",
-                    HttpStatusCode.BadRequest);
+                    HttpStatusCode.NotFound);
             }
 
             #region async manuel fluent validation business check
@@ -89,12 +115,7 @@ namespace App.Services.Products
 
             #endregion
 
-            var product = new Product()
-            {
-                Name = request.Name,
-                Price = request.Price,
-                Stock = request.Stock
-            };
+            var product = mapper.Map<Product>(request);
 
             await productRepository.AddAsync(product);
             await unitOfWork.SaveChangesAsync();
@@ -115,12 +136,28 @@ namespace App.Services.Products
 
             if (product is null)
             {
-                return ServiceResult.Fail("Product not found", HttpStatusCode.NotFound);
+                return ServiceResult.Fail("güncellenecek ürün bulunamadı.", HttpStatusCode.NotFound);
             }
 
-            product.Name = request.Name;
-            product.Price = request.Price;
-            product.Stock = request.Stock;
+
+            var isProductNameExist =
+                await productRepository.Where(x => x.Name == request.Name && x.Id != product.Id).AnyAsync();
+
+
+            if (isProductNameExist)
+            {
+                return ServiceResult.Fail("ürün ismi veritabanında bulunmaktadır.",
+                    HttpStatusCode.BadRequest);
+            }
+
+
+            //product.Name = request.Name;
+            //product.Price = request.Price;
+            //product.Stock = request.Stock;
+
+
+            product = mapper.Map(request, product);
+
 
             productRepository.Update(product);
             await unitOfWork.SaveChangesAsync();

@@ -1,8 +1,7 @@
 ﻿using App.Repositories.Products;
 using FluentValidation;
-using Microsoft.EntityFrameworkCore;
 
-namespace App.Services.Products
+namespace App.Services.Products.Create
 {
     public class CreateProductRequestValidator : AbstractValidator<CreateProductRequest>
     {
@@ -21,6 +20,11 @@ namespace App.Services.Products
             // price validation
             RuleFor(x => x.Price)
                 .GreaterThan(0).WithMessage("ürün fiyatı 0'dan büyük olmalıdır.");
+
+
+            RuleFor(x => x.CategoryId)
+                .GreaterThan(0).WithMessage("ürün kategori değeri 0'dan büyük olmalıdır.");
+
 
             //stock inclusiveBetween validation
             RuleFor(x => x.Stock)
