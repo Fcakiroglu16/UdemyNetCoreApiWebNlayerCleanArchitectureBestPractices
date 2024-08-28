@@ -1,6 +1,50 @@
-@App.API_HostAddress = http://localhost:5024
+@App.API_HostAddress = https://localhost:7006
 
-GET {{App.API_HostAddress}}/weatherforecast/
-Accept: application/json
+### Get all products
+GET {{App.API_HostAddress}}/api/products
 
-###
+
+### Get paged products
+GET {{App.API_HostAddress}}/api/products/1/10
+
+### Get product by ID
+GET {{App.API_HostAddress}}/api/products/33
+
+### Create a new product
+POST {{App.API_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+  "name": "NewPro3",
+  "description": "Product description",
+  "price": 100.0,
+  "stock": 50,
+  "CategoryId":1
+}
+
+### Update a product
+PUT {{App.API_HostAddress}}/api/products/31
+Content-Type: application/json
+
+{
+  "name": "product2",
+  "description": "Updated description",
+  "price": 150.0,
+  "stock": 30,
+  "CategoryId":1
+}
+
+### Update product stock
+PATCH {{App.API_HostAddress}}/api/products/stock
+Content-Type: application/json
+
+{
+  "productId": 1,
+  "stock": 100
+}
+
+### Delete a product
+DELETE {{App.API_HostAddress}}/api/products/1
+
+
+
