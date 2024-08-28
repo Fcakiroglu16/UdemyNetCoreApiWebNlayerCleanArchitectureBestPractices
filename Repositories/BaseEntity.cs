@@ -1,7 +1,6 @@
-﻿namespace App.Repositories
+﻿namespace App.Repositories;
+
+public class BaseEntity<T>
 {
-    public class BaseEntity<T>
-    {
-        public T Id { get; set; } = default!;
-    }
+    public T Id { get; set; } = default!;
 }

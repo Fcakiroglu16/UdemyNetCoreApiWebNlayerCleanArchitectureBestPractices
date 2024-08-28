@@ -1,4 +1,3 @@
-﻿namespace App.Services.Categories.Create
-{
-    public record CreateCategoryRequest(string Name);
-}
+﻿namespace App.Services.Categories.Create;
+
+public record CreateCategoryRequest(string Name);
