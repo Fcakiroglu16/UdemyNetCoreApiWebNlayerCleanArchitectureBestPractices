@@ -19,6 +19,7 @@ namespace App.API.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById(int id) => CreateActionResult(await productService.GetByIdAsync(id));
 
+
         [HttpPost]
         public async Task<IActionResult> Create(CreateProductRequest request)
         {
