@@ -1,9 +1,7 @@
 ﻿namespace App.Repositories
 {
-    public interface IAuditEntity
+    public class BaseEntity<T>
     {
-        public DateTime Created { get; set; }
-
-        public DateTime? Updated { get; set; }
+        public T Id { get; set; } = default!;
     }
 }

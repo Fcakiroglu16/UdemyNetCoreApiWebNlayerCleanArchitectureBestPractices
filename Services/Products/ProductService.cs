@@ -131,17 +131,8 @@ namespace App.Services.Products
             // Guard Clauses
 
 
-            var product = await productRepository.GetByIdAsync(id);
-
-
-            if (product is null)
-            {
-                return ServiceResult.Fail("güncellenecek ürün bulunamadı.", HttpStatusCode.NotFound);
-            }
-
-
             var isProductNameExist =
-                await productRepository.Where(x => x.Name == request.Name && x.Id != product.Id).AnyAsync();
+                await productRepository.Where(x => x.Name == request.Name && x.Id != id).AnyAsync();
 
 
             if (isProductNameExist)
@@ -151,13 +142,8 @@ namespace App.Services.Products
             }
 
 
-            //product.Name = request.Name;
-            //product.Price = request.Price;
-            //product.Stock = request.Stock;
-
-
-            product = mapper.Map(request, product);
-
+            var product = mapper.Map<Product>(request);
+            product.Id = id;
 
             productRepository.Update(product);
             await unitOfWork.SaveChangesAsync();
@@ -189,13 +175,8 @@ namespace App.Services.Products
         {
             var product = await productRepository.GetByIdAsync(id);
 
-            if (product is null)
-            {
-                return ServiceResult.Fail("Product not found", HttpStatusCode.NotFound);
-            }
 
-
-            productRepository.Delete(product);
+            productRepository.Delete(product!);
             await unitOfWork.SaveChangesAsync();
             return ServiceResult.Success(HttpStatusCode.NoContent);
         }
